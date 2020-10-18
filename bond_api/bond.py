@@ -41,6 +41,20 @@ class Bond:
         """Return current device state reported by API."""
         return await self.__get(f"/v2/devices/{device_id}/state")
 
+    async def set_device_state(self, device_id: str, newState: dict) -> None:
+        """Update the state for a given device."""
+        path = f"/v2/devices/{device_id}/state"
+
+        async def patch(session: ClientSession) -> None:
+            async with session.patch(
+                    f"http://{self._host}{path}",
+                    **self._api_kwargs,
+                    json=newState
+            ) as response:
+                response.raise_for_status()
+
+        await self.__call(patch)
+
     async def action(self, device_id: str, action: Action) -> None:
         """Execute given action for a given device."""
         path = f"/v2/devices/{device_id}/actions/{action.name}"
